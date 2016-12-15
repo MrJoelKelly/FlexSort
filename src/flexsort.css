@@ -1,0 +1,13 @@
+div.FlexSort div.table-row.header div.column{
+  cursor:pointer;
+}
+
+div.column.something,
+div.column.somethingelse,
+div.column.yetanother{
+  flex: 1 1 100px;
+}
+
+div.table-row.header{
+  font-weight:600;
+}
