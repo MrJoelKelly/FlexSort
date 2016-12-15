@@ -22,7 +22,7 @@
     currency_columns: {} //i.e. selector [0] containing "$" would mean the first column is USD
   }
 
-  $.fn.flexSort = function(options){
+  $.fn.flexsort = function(options){
     FlexSort = $(this);
 
     setOptions(options);
@@ -36,7 +36,7 @@
     //Iterate through keys given in users options
     for(var key in options){
       //Check not empty value
-      var empty_test = options[key]+=""; //Convert to string to perform boolean test
+      var empty_test = options[key] + ""; //Convert to string to perform boolean test
       if(empty_test){ //If value not empty
         //If exists in default_options, these are user-definable options
         if(key in default_options){
@@ -45,7 +45,6 @@
             //If a valid option from system_options
             if(!(options[key] in system_options[key])) continue //Skips rest of loop if the key doesn't have a valid value within system_options
           }
-
           //Validation tests
           valid = false; //Presume invalidity
           switch(key){
@@ -80,7 +79,7 @@
       var columnIndex = $(this).index();
 
       //We only update the list of user-sortable columns if not set in options
-      if(isEmpty(options.columns)){
+      if(isEmpty(options.columns) && $(this).closest('div.' + default_options.row_name).hasClass(default_options.header_row_class)){
         default_options.columns.push(thisList[1]); //We always presume first column is column_name and second is the sortable name
       }
 
@@ -127,7 +126,16 @@
 
     //Bind header columns to sortColumn()
     FlexSort.find('div.' + default_options.row_name + '.' + default_options.header_row_class + ' div.' + default_options.column_name).each(function(){
-      $(this).click(function(){sortColumn($(this))});
+      //Check if it's a sortable column
+      var element = $(this);
+      var column_classes = element.attr('class').split(/\s+/);
+
+      for(var i=0; i<default_options.columns.length; i++){
+        if(column_classes[1] == default_options.columns[i]){
+          element.click(function(){sortColumn(element);});
+          break;
+        }
+      }
     })
   }
 
@@ -192,7 +200,6 @@
         return a[columnIndex] < b[columnIndex];
       })
     }
-    console.log(table.data);
   }
 
   //Redraws the table from the table object

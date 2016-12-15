@@ -1,3 +1,4 @@
 $(document).ready(function(){
-  $('div.myflextable').flexSort();
+  var columns = ["name","age"];
+  $('div.myflextable').flexsort({columns: columns});
 })
