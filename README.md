@@ -12,7 +12,7 @@ flexsort.css
 
 ## Functionality
 
-Users can click on a header of a column and it will sort the table into either ascending (default) or descending order. It supports alphabetical, numerical and currency (currently only for $ and £) sorting.
+Users can click on a header of a column and it will sort the table into either ascending (default on first-click) or descending order. It supports alphabetical, numerical and currency (currently only for $ and £) sorting.
 
 ## Setup
 
