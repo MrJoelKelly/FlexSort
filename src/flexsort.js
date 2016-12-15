@@ -8,8 +8,8 @@
   var system_options = {}
 
   var default_options = {
-    row_name: "div.table-row",
-    column_name: "div.column",
+    row_name: "table-row",
+    column_name: "column",
     header_row_class: "header",
     columns: [] //Array of SORTABLE columns, by default all
   }
@@ -18,7 +18,8 @@
   //table.data[0] would contain an array of the first row of data, table.data[0][1] is the second column on the first row
   var table = {
     columns: [],
-    data: {}
+    data: [],
+    currency_columns: {} //i.e. selector [0] containing "$" would mean the first column is USD
   }
 
   $.fn.flexSort = function(options){
@@ -26,6 +27,8 @@
 
     setOptions(options);
     initiate(options);
+
+    $('div.header div.column.something').addClass('test')
   };
 
   //Set default_options object to user options
@@ -70,9 +73,9 @@
     var classList = [];
 
     var row = -1,
-        row_length = FlexSort.find(default_options.row_name + '.' + default_options.header_row_class + ' ' + default_options.column_name).length - 1; //Number of columns per row
+        row_length = FlexSort.find('div.' + default_options.row_name + '.' + default_options.header_row_class + ' div.' + default_options.column_name).length - 1; //Number of columns per row
 
-    FlexSort.find(default_options.row_name + ' ' + default_options.column_name).each(function(index){
+    FlexSort.find('div.' + default_options.row_name + ' div.' + default_options.column_name).each(function(index){
       var thisList = this.className.split(/\s+/); //Get list of all of this elements classes
       var columnIndex = $(this).index();
 
@@ -86,13 +89,34 @@
       }
 
       //Populates our table data from all rows except the header row
-      if(!$(this).closest(default_options.row_name).hasClass(default_options.header_row_class)){
+      if(!$(this).closest('div.' + default_options.row_name).hasClass(default_options.header_row_class)){
         //If first column of new row, initialise array in table.data object
         if(columnIndex == 0){
           table.data[row] = new Array();
         }
+        var content = $(this).text();
 
-        table.data[row][columnIndex] = $(this).text();
+        //Check if currency row
+        var currencies = ["£","$"];
+        for(var i=0; i<currencies.length; i++){
+          if(content.substring(0,1) == currencies[i]){
+            table.currency_columns[columnIndex] = content.substring(0,1);
+            content = content.substr(1,content.length);
+            var number = Number(content);
+          }
+        }
+
+        //Test if string is an integer, only fires if number doesn't already exist
+        //Converts to integer
+        if(!isNaN(content) && isEmpty(number)){
+          var number = Number(content);
+        }
+
+        if(number && !isNaN(number)){
+          table.data[row][columnIndex] = number
+        }else{
+          table.data[row][columnIndex] = content;
+        }
       }
 
       //If reached end of row, increment row
@@ -100,7 +124,11 @@
         row++;
       }
     })
-    console.log(table);
+
+    //Bind header columns to sortColumn()
+    FlexSort.find('div.' + default_options.row_name + '.' + default_options.header_row_class + ' div.' + default_options.column_name).each(function(){
+      $(this).click(function(){sortColumn($(this))});
+    })
   }
 
   //Used to test if an object/val is empty.
@@ -114,8 +142,80 @@
     }
   }
 
-  function sortColumn(){
+  //Sorts table based on clicked header
+  function sortColumn(element){
+    var sort_state = element.attr('class').split(/\s+/);
+    var columnIndex = element.index(); //Index of column to select data from table object
+    var sorted_classes = ["asc", "desc"]; //Class names applied to columns that are sorted in some way
+    var sorted = false; //Indicates sorted state
 
+    $('div.' + default_options.row_name + '.' + default_options.header_row_class + ' div.' + default_options.column_name).not(element).removeClass('desc asc'); //Remove asc and desc classes from any other columns
+
+    for(var current_class in sort_state){
+      $.each(sorted_classes, function(index, value){
+        if(sort_state[current_class] == value){ //If triggered, 'value' is the current sort state class, if it's never triggered then it's not currently sorted.
+          switch(value){
+            case 'asc': //Already asc, set to desc
+              sortTableData(false, columnIndex);
+              element.removeClass('asc').addClass('desc');
+              break;
+            case 'desc': //Already desc, set to asc
+              sortTableData(true, columnIndex);
+              element.removeClass('desc').addClass('asc');
+              break;
+          }
+          sorted = true;
+        }
+        if(sorted){return}
+      })
+    }
+
+    //Fires if the column had no existing sort state, defaults to ascending
+    if(!sorted){
+      sortTableData(true, columnIndex);
+      element.addClass('asc');
+    }
+
+    drawTable();
   }
 
+  //Sorts the actual table.data object, based on 'action' being true for asc and false for desc
+  //columnIndex is the column to sort
+  //Compares table.data[0][columnIndex] to table.data[1][columnIndex] and so on
+  function sortTableData(action, columnIndex){
+
+    if(action){ //Sort to ascending (A to Z)
+      table.data = table.data.sort(function(a,b){ //Sorts ascending
+        return a[columnIndex] > b[columnIndex];
+      })
+    }else{ //Sort to descending (Z to A)
+      table.data = table.data.sort(function(a,b){ //Sorts descending
+        return a[columnIndex] < b[columnIndex];
+      })
+    }
+    console.log(table)
+  }
+
+  //Redraws the table from the table object
+  function drawTable(){
+    $(FlexSort).children('div.' + default_options.row_name).not('.' + default_options.header_row_class).remove(); //Remove all rows
+
+    //Draw each new row
+    for(var row in table.data){
+      var row_html = '<div class="' + default_options.row_name + '">';
+
+      for(var i=0; i<table.data[row].length; i++){ //Each cell
+        row_html += '<div class="' + default_options.column_name + ' ' + table.columns[i] + '">';
+
+        if(i in table.currency_columns){
+          row_html += table.currency_columns[i];
+        }
+
+        row_html += table.data[row][i] + '</div>';
+      }
+
+      row_html += '</div>';
+      $(FlexSort).append(row_html);
+    }
+  }
 })(jQuery);
