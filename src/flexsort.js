@@ -183,7 +183,6 @@
   //columnIndex is the column to sort
   //Compares table.data[0][columnIndex] to table.data[1][columnIndex] and so on
   function sortTableData(action, columnIndex){
-
     if(action){ //Sort to ascending (A to Z)
       table.data = table.data.sort(function(a,b){ //Sorts ascending
         return a[columnIndex] > b[columnIndex];
@@ -193,13 +192,13 @@
         return a[columnIndex] < b[columnIndex];
       })
     }
-    console.log(table)
+    console.log(table.data);
   }
 
   //Redraws the table from the table object
   function drawTable(){
     $(FlexSort).children('div.' + default_options.row_name).not('.' + default_options.header_row_class).remove(); //Remove all rows
-
+    $(FlexSort).find('div.' + default_options.row_name + '.' + default_options.header_row_class + ' div.' + default_options.column_name + ' div.arrow').remove();
     //Draw each new row
     for(var row in table.data){
       var row_html = '<div class="' + default_options.row_name + '">';
@@ -217,5 +216,18 @@
       row_html += '</div>';
       $(FlexSort).append(row_html);
     }
+
+    //Add SVG Arrow(s)
+    $(FlexSort).find('div.' + default_options.row_name + '.' + default_options.header_row_class + ' div.' + default_options.column_name).each(function(){
+      if($(this).hasClass('asc') || $(this).hasClass('desc')){
+        $(this).append('<div class="arrow"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M5 3l3.057-3 11.943 12-11.943 12-3.057-3 9-9z"/></svg></div>');
+
+        if($(this).hasClass('asc')){
+          $(this).find('div.arrow svg').addClass('asc');
+        }else{
+          $(this).find('div.arrow svg').addClass('desc');
+        }
+      }
+    })
   }
 })(jQuery);
