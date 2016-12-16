@@ -27,8 +27,7 @@
 
     setOptions(options);
     initiate(options);
-
-    $('div.header div.column.something').addClass('test')
+    drawTable();
   };
 
   //Set default_options object to user options
@@ -56,10 +55,48 @@
           if(valid){
             default_options[key] = options[key]; //Update default_options values
           }
+        }else if(key == 'data'){ //If the user has set their own data in options
+          var rowIndex = 0;
+          for(var row in options[key]){ //Loops through each row array in the given data
+            for(var item in options[key][row]){
+              item = Number(item);
+              populateTableData(options[key][row][item], item, rowIndex)
+            }
+            rowIndex++;
+          }
         }
       }
     }
   };
+
+  //Used to populate table data from both the page search and data included in options
+  function populateTableData(content, index, row){
+    if(index == 0){
+      table.data[row] = new Array();
+    }
+    //Convert content to string
+    content += "";
+    //Check if currency row
+    var currencies = ["£","$"];
+    for(var i=0; i<currencies.length; i++){
+      if(content.substring(0,1) == currencies[i]){
+        table.currency_columns[index] = content.substring(0,1);
+        content = content.substr(1,content.length);
+        var number = Number(content);
+      }
+    }
+
+    //Test if string is an integer, only fires if number doesn't already exist
+    //Converts to integer
+    if(!isNaN(content) && isEmpty(number)){
+      var number = Number(content);
+    }
+    if(number && !isNaN(number)){
+      table.data[row][index] = number
+    }else{
+      table.data[row][index] = content;
+    }
+  }
 
   //Adds FlexSort class to the table
   //Binds elements
@@ -71,52 +108,25 @@
     FlexSort.addClass('FlexSort');
     var classList = [];
 
-    var row = -1,
+    var row = table.data.length,
         row_length = FlexSort.find('div.' + default_options.row_name + '.' + default_options.header_row_class + ' div.' + default_options.column_name).length - 1; //Number of columns per row
 
-    FlexSort.find('div.' + default_options.row_name + ' div.' + default_options.column_name).each(function(index){
+    //Get column classes from header row
+    FlexSort.find('div.' + default_options.row_name + '.' + default_options.header_row_class + ' div.' + default_options.column_name).each(function(){
       var thisList = this.className.split(/\s+/); //Get list of all of this elements classes
-      var columnIndex = $(this).index();
 
       //We only update the list of user-sortable columns if not set in options
       if(isEmpty(options.columns) && $(this).closest('div.' + default_options.row_name).hasClass(default_options.header_row_class)){
         default_options.columns.push(thisList[1]); //We always presume first column is column_name and second is the sortable name
       }
+      table.columns.push(thisList[1]); //Add column class/'name' to our table data
+    })
 
-      if(row == -1){
-        table.columns.push(thisList[1]); //Add column class/'name' to our table data
-      }
+    FlexSort.find('div.' + default_options.row_name).not('.' + default_options.header_row_class).find(' div.' + default_options.column_name).each(function(index){
+      var columnIndex = $(this).index();
+      var content = $(this).text();
 
-      //Populates our table data from all rows except the header row
-      if(!$(this).closest('div.' + default_options.row_name).hasClass(default_options.header_row_class)){
-        //If first column of new row, initialise array in table.data object
-        if(columnIndex == 0){
-          table.data[row] = new Array();
-        }
-        var content = $(this).text();
-
-        //Check if currency row
-        var currencies = ["£","$"];
-        for(var i=0; i<currencies.length; i++){
-          if(content.substring(0,1) == currencies[i]){
-            table.currency_columns[columnIndex] = content.substring(0,1);
-            content = content.substr(1,content.length);
-            var number = Number(content);
-          }
-        }
-
-        //Test if string is an integer, only fires if number doesn't already exist
-        //Converts to integer
-        if(!isNaN(content) && isEmpty(number)){
-          var number = Number(content);
-        }
-
-        if(number && !isNaN(number)){
-          table.data[row][columnIndex] = number
-        }else{
-          table.data[row][columnIndex] = content;
-        }
-      }
+      populateTableData(content,columnIndex,row);
 
       //If reached end of row, increment row
       if(columnIndex === row_length){

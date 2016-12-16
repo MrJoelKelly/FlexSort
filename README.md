@@ -1,6 +1,6 @@
 # jQuery FlexSort
 
-A basic jQuery plugin to sort tables created using CSS flexbox.
+A jQuery plugin to sort tables created using CSS flexbox.
 
 ## Requirements
 
@@ -13,6 +13,8 @@ flexsort.css
 ## Functionality
 
 Users can click on a header of a column and it will sort the table into either ascending (default on first-click) or descending order. It supports alphabetical, numerical and currency (currently only for $ and £) sorting.
+
+FlexSort will read in all data from the appropriate rows in the table. You can also add data in an array object as described in options, with the parameter *data*
 
 ## Setup
 
@@ -73,3 +75,4 @@ The current valid option parameters are as follows:
 | column_name      | Defaults to 'column', used to denote the div.class of each column within the rows of your table | Any valid class name |
 | header_row_class | Defaults to 'header', used to denote the div.class of your header row | Any valid class name |
 | columns | Denotes which columns are sortable within the table. Defaults to allow all columns | An array of the class names of individual columns, e.g. ["name", "age"] |
+| data | Adds extra data to the table, in addition to what exists already in the HTML | A 2D Array of values, where each inner array is a row of data, e.g. [["Robert",25,"Male"],["Dave",33,"Female"]] |
