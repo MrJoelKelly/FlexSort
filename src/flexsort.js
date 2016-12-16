@@ -1,5 +1,6 @@
 /*
   jQuery FlexSort Plugin
+  https://github.com/MrJoelKelly/FlexSort
   Joel Kelly (Joel.Kelly@keltec.systems)
 */
 (function($){
