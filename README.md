@@ -71,8 +71,8 @@ The current valid option parameters are as follows:
 
 | OptionName    | Description   | Valid Parameters  |
 | ------------- |:-------------:| :-----:|
-| row_name     | Defaults to 'table-row', used to denote the div.class of each row in your table | Any valid class name |
-| column_name      | Defaults to 'column', used to denote the div.class of each column within the rows of your table | Any valid class name |
-| header_row_class | Defaults to 'header', used to denote the div.class of your header row | Any valid class name |
-| columns | Denotes which columns are sortable within the table. Defaults to allow all columns | An array of the class names of individual columns, e.g. ["name", "age"] |
-| data | Adds extra data to the table, in addition to what exists already in the HTML | A 2D Array of values, where each inner array is a row of data, e.g. [["Robert",25,"Male"],["Dave",33,"Female"]] |
+| **row_name**     | Defaults to 'table-row', used to denote the div.class of each row in your table | Any valid class name |
+| **column_name**      | Defaults to 'column', used to denote the div.class of each column within the rows of your table | Any valid class name |
+| **header_row_class** | Defaults to 'header', used to denote the div.class of your header row | Any valid class name |
+| **columns** | Denotes which columns are sortable within the table. Defaults to allow all columns | An array of the class names of individual columns, e.g. ["name", "age"] |
+| **data** | Adds extra data to the table, in addition to what exists already in the HTML | A 2D Array of values, where each inner array is a row of data, e.g. [["Robert",25,"Male"],["Dave",33,"Female"]] |
